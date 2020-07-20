@@ -9,7 +9,6 @@ def cypher_to_graph(input_file):
         lines = fp.readlines()
         for line in lines:
             line = line.strip()
-            print(f"Line: {line}")
             if 'SET' in line:
                 args = re.match(re.compile(
                     '^SET ([0-9a-zA-Z]+).([a-zA-Z]+) = \'?([0-9a-zA-Z\s\-_]+)\'?$'
@@ -22,6 +21,7 @@ def cypher_to_graph(input_file):
                 set_property(graph=graph, node_name=args[0], prop=args[1], value=args[2])
 
             elif '[' in line and ']' in line:
+                print(line)
                 args = re.match(re.compile(
                     '^MERGE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
                 ), line).groups()
@@ -48,11 +48,8 @@ def cypher_to_graph(input_file):
                       f"The resulting table will not contain the effect of this statement, "
                       f"so you should probably add it by hand in the table")
                 continue
-            print(args)
 
-            print(f"Graph: {graph}")
-
-    return Graph([], [])
+    return graph
 
 
 def merge_node(graph, node_name, unparsed_labels, unparsed_properties):

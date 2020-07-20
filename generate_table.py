@@ -18,11 +18,16 @@ def parse_args():
                              '-d "(Customer,customerId - Product,docId)(User,userId - Product,docId)"')
     args = parser.parse_args()
 
-    return args.input, args.output, parse_dimension_arg(args.dimensions)
+    return args.input, args.output, parse_dimension_arg(args.dimensions[0])
 
 
 def parse_dimension_arg(dim):
-    return dim
+    tables = [table[1:].split("-") for table in dim.strip().split(")")][:-1]
+
+    return [(
+        (table[0].split(",")[0], table[0].split(",")[1]),
+        (table[1].split(",")[0], table[1].split(",")[1])
+    ) for table in tables]
 
 
 def main():
