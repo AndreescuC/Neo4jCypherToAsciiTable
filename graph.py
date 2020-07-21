@@ -64,11 +64,20 @@ class Node:
 
 
 class Edge:
-    def __init__(self, name, from_node, to_node, identifier=None):
+    def __init__(self, name, from_node, to_node, properties=None, identifier=None):
+        if properties is None:
+            properties = {}
         self.name = name
         self.from_node = from_node
         self.to_node = to_node
         self.identifier = identifier
+        self.properties = properties
+
+    def add_property(self, key, value):
+        self.properties[key] = value
+
+    def get_representation(self):
+        return self.name if len(self.properties) == 0 else f"{self.name}[{','.join(self.properties.values())}]"
 
     def __str__(self):
         return f"[{self.from_node}-{self.name}->{self.to_node}]"

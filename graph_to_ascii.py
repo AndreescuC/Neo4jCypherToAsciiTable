@@ -38,10 +38,10 @@ def get_cell_content(table, graph, row_node, row_index, row_label, row_property,
             remaining_properties = f" ({remaining_properties})"
         if len(table.column_related_labels) > 0:
             related_nodes = graph.get_labeled_related_nodes_for(column_node, table.column_related_labels)
-            related_nodes = f'({", ".join(related_nodes)})' if len(related_nodes) > 0 else ""
+            related_nodes = f' ({", ".join(related_nodes)})' if len(related_nodes) > 0 else ""
         else:
             related_nodes = ""
-        return f"{main_property}{remaining_labels}{remaining_properties}{related_nodes}"
+        return f"{main_property}{remaining_labels}{related_nodes}{remaining_properties}"
 
     if column_index == 0:
         main_property = row_node.properties[row_property]
@@ -53,12 +53,15 @@ def get_cell_content(table, graph, row_node, row_index, row_label, row_property,
             remaining_properties = f" ({remaining_properties})"
         if len(table.row_related_labels) > 0:
             related_nodes = graph.get_labeled_related_nodes_for(row_node, table.row_related_labels)
-            related_nodes = f'({", ".join(related_nodes)})' if len(related_nodes) > 0 else ""
+            related_nodes = f' ({", ".join(related_nodes)})' if len(related_nodes) > 0 else ""
         else:
             related_nodes = ""
         return f"{main_property}{remaining_labels}{related_nodes}{remaining_properties}"
 
-    return ''.join([e.name for e in graph.get_edges_for(row_node, column_node)])
+    return ','.join([
+        e.get_representation()
+        for e in graph.get_edges_for(row_node, column_node)
+    ])
 
 
 def append_to_file(matrix, out_file, ran_command):
@@ -111,7 +114,7 @@ def convert_aliases(matrix):
             for rel, alias in aliases["Relationship"].items():
                 if cell.find(f"{rel}") > -1:
                     legend[alias] = rel
-                    cell = cell.replace(f"{rel}", f"{alias},")
+                    cell = cell.replace(f"{rel}", f"{alias}")
 
             parsed_matrix[i][j] = cell
 

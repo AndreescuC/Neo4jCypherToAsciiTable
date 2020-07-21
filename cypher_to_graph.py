@@ -9,6 +9,7 @@ def cypher_to_graph(input_file):
         lines = fp.readlines()
         for line in lines:
             line = line.strip()
+            print(f"Parsing query '{line}'")
             if 'SET' in line:
                 args = re.match(re.compile(
                     '^SET ([0-9a-zA-Z]+).([a-zA-Z]+) = \'?([0-9a-zA-Z\s\-_]+)\'?$'
@@ -18,10 +19,9 @@ def cypher_to_graph(input_file):
                           "The resulting table will not contain the effect of this statement, "
                           f"so you should probably add it by hand in the table")
                     continue
-                set_property(graph=graph, node_name=args[0], prop=args[1], value=args[2])
+                set_property(graph=graph, entity_name=args[0], prop=args[1], value=args[2])
 
             elif '[' in line and ']' in line:
-                print(line)
                 args = re.match(re.compile(
                     '^MERGE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[([0-9a-zA-Z]+)?:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
                 ), line).groups()
@@ -37,7 +37,7 @@ def cypher_to_graph(input_file):
 
             elif 'MERGE' in line:
                 args = re.match(re.compile(
-                    '^MERGE \(([0-9a-zA-Z]+)((?::(?:[a-zA-Z]+)+)+)+(?: {((?:[a-zA-Z]+:[0-9a-zA-Z]+(?:, )?)+)})?\)$'
+                    '^MERGE \(([0-9a-zA-Z]+)((?::(?:[a-zA-Z]+)+)+)+(?: {((?:[a-zA-Z]+:(?: )?[0-9a-zA-Z]+(?:, )?)+)})?\)$'
                 ), line).groups()
                 if len(args) != 3:
                     print(f"Unable to parse cypher node MERGE statement: {line}"
@@ -79,9 +79,13 @@ def add_edge(graph, node1, node2, verb, direction, verb_identifier=None):
     graph.add_edge(edge)
 
 
-def set_property(graph, node_name, prop, value):
-    node = [n for n in graph.nodes if n.name == node_name][0]
-    node.add_property(prop, value)
+def set_property(graph, entity_name, prop, value):
+    node = [n for n in graph.nodes if n.name == entity_name]
+    if len(node) == 1:
+        node[0].add_property(prop, value)
+    else:
+        edge = [e for e in graph.edges if e.identifier == entity_name][0]
+        edge.add_property(prop, value)
 
 
 if __name__ == '__main__':
