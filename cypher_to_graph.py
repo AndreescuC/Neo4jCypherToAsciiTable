@@ -23,14 +23,17 @@ def cypher_to_graph(input_file):
             elif '[' in line and ']' in line:
                 print(line)
                 args = re.match(re.compile(
-                    '^MERGE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
+                    '^MERGE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[([0-9a-zA-Z]+)?:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
                 ), line).groups()
-                if len(args) != 5:
+                if len(args) not in [5, 6]:
                     print(f"Unable to parse cypher relationship MERGE statement: {line}\n"
                           f"The resulting table will not contain the effect of this statement, "
                           f"so you should probably add it by hand in the table")
                     continue
-                add_edge(graph=graph, node1=args[0], node2=args[4], verb=args[2], direction=args[3])
+                if len(args) == 5:
+                    add_edge(graph=graph, node1=args[0], node2=args[4], verb=args[2], direction=args[3])
+                else:
+                    add_edge(graph=graph, node1=args[0], node2=args[5], verb=args[3], direction=args[4], verb_identifier=args[2])
 
             elif 'MERGE' in line:
                 args = re.match(re.compile(
@@ -60,11 +63,11 @@ def merge_node(graph, node_name, unparsed_labels, unparsed_properties):
         [property.split(":") for property in unparsed_properties.split(", ")]
     } if unparsed_properties is not None else {}
 
-    node = Node(name=node_name, labels=labels, edges=[], properties=properties)
+    node = Node(name=node_name, labels=labels, properties=properties)
     graph.add_node(node)
 
 
-def add_edge(graph, node1, node2, verb, direction):
+def add_edge(graph, node1, node2, verb, direction, verb_identifier=None):
     if direction == "->":
         from_node = node1
         to_node = node2
@@ -72,7 +75,7 @@ def add_edge(graph, node1, node2, verb, direction):
         from_node = node2
         to_node = node1
 
-    edge = Edge(name=verb, from_node=from_node, to_node=to_node)
+    edge = Edge(name=verb, from_node=from_node, to_node=to_node, identifier=verb_identifier)
     graph.add_edge(edge)
 
 

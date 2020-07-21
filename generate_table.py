@@ -1,4 +1,6 @@
+import sys
 import argparse
+from table import construct_tables
 from cypher_to_graph import cypher_to_graph
 from graph_to_ascii import graph_to_ascii
 
@@ -15,25 +17,16 @@ def parse_args():
                              '"(LabelUsedForColumns,propertyUsedForColumnsHeader - LabelUsedForRows,propertyUsedForRowsHeader)"; ' \
                              'Matrices should be provided with no character between them in the input\n' \
                              'e. g.: for building 2 matrices, customers-products and users-products: ' \
-                             '-d "(Customer,customerId - Product,docId)(User,userId - Product,docId)"')
+                             '-d "(Customer,customerId-Product,docId)(User,userId-Product,docId)"')
     args = parser.parse_args()
 
-    return args.input, args.output, parse_dimension_arg(args.dimensions[0])
-
-
-def parse_dimension_arg(dim):
-    tables = [table[1:].split("-") for table in dim.strip().split(")")][:-1]
-
-    return [(
-        (table[0].split(",")[0], table[0].split(",")[1]),
-        (table[1].split(",")[0], table[1].split(",")[1])
-    ) for table in tables]
+    return args.input, args.output, construct_tables(args.dimensions[0])
 
 
 def main():
-    in_file, out_file, dimensions = parse_args()
+    in_file, out_file, tables = parse_args()
     graph = cypher_to_graph(in_file)
-    graph_to_ascii(graph, dimensions, out_file)
+    graph_to_ascii(graph, tables, out_file, ' '.join(sys.argv))
 
 
 if __name__ == '__main__':

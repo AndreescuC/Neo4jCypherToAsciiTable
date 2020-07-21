@@ -1,0 +1,12 @@
+Property:
+  available: a
+  sensible: s
+  ignored: i
+
+Label:
+  Genius: g
+
+Relationship:
+  RECENTLY_ORDERED: ro
+  CUSTOMER_VISITED: cv
+  ORDERED: o

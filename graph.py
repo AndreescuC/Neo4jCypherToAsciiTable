@@ -9,11 +9,28 @@ class Graph:
     def add_edge(self, edge):
         self.edges.append(edge)
 
+    def get_node_by_name(self, name):
+        return [n for n in self.nodes if n.name == name][0]
+
     def get_edges_for(self, n1, n2):
         return [
             e for e in self.edges
-            if (e.from_node == n1 and e.to_node == n2) or (e.to_node == n1 and e.from_node == n2)
+            if (e.from_node == n1.name and e.to_node == n2.name) or
+               (e.to_node == n1.name and e.from_node == n2.name)
         ]
+
+    def get_related_nodes_for(self, node):
+        nodes = []
+        for e in self.edges:
+            if e.to_node == node.name:
+                nodes.append(e.from_node)
+            if e.from_node == node.name:
+                nodes.append(e.to_node)
+
+        return nodes
+
+    def get_labeled_related_nodes_for(self, node, labels):
+        return [n for n in self.get_related_nodes_for(node) if len(set(self.get_node_by_name(n).labels) & set(labels)) > 0]
 
     def __str__(self):
         return f"Graph with {len(self.nodes)} nodes and {len(self.edges)} edges:\n" \
@@ -25,7 +42,7 @@ class Graph:
 
 
 class Node:
-    def __init__(self, name, labels, edges, properties):
+    def __init__(self, name, labels, properties):
         self.name = name
         self.labels = labels
         self.properties = properties
@@ -47,10 +64,11 @@ class Node:
 
 
 class Edge:
-    def __init__(self, name, from_node, to_node):
+    def __init__(self, name, from_node, to_node, identifier=None):
         self.name = name
         self.from_node = from_node
         self.to_node = to_node
+        self.identifier = identifier
 
     def __str__(self):
         return f"[{self.from_node}-{self.name}->{self.to_node}]"
