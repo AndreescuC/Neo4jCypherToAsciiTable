@@ -86,7 +86,3 @@ def set_property(graph, entity_name, prop, value):
     else:
         edge = [e for e in graph.edges if e.identifier == entity_name][0]
         edge.add_property(prop, value)
-
-
-if __name__ == '__main__':
-    cypher_to_graph("test")
