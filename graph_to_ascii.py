@@ -45,7 +45,7 @@ def get_cell_content(table, graph, row_node, row_index, row_label, row_property,
 
         remaining_labels = ')('.join([l for l in column_node.labels if l != column_label])
         if remaining_labels != "":
-            remaining_labels = f"({remaining_labels})"
+            remaining_labels = f"[{remaining_labels}]"
 
         if len(table.column_related_labels) > 0:
             related_nodes = graph.get_labeled_related_nodes_for(column_node, table.column_related_labels)
@@ -64,7 +64,7 @@ def get_cell_content(table, graph, row_node, row_index, row_label, row_property,
 
         remaining_labels = ')('.join([l for l in row_node.labels if l != row_label])
         if remaining_labels != "":
-            remaining_labels = f"({remaining_labels})"
+            remaining_labels = f"[{remaining_labels}]"
 
         if len(table.row_related_labels) > 0:
             related_nodes = graph.get_labeled_related_nodes_for(row_node, table.row_related_labels)
@@ -116,9 +116,9 @@ def convert_aliases(matrix):
                     cell = cell.replace(f"{prop}:", f"{alias}:")
 
             for label, alias in aliases["Label"].items():
-                if cell.find(f"({label})") > -1:
+                if cell.find(f"[{label}]") > -1:
                     legend[alias] = label
-                    cell = cell.replace(f"({label})", f"({alias})")
+                    cell = cell.replace(f"[{label}]", f"[{alias}]")
 
             for rel, alias in aliases["Relationship"].items():
                 if cell.find(f"{rel}") > -1:

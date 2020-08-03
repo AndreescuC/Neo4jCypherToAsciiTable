@@ -29,7 +29,6 @@ def parse_args():
 
 def main():
     in_file, out_file, tables, show_properties = parse_args()
-    print(show_properties)
     graph = cypher_to_graph(in_file)
     graph_to_ascii(graph, tables, out_file, ' '.join(sys.argv), show_properties)
 
