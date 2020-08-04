@@ -9,41 +9,48 @@ def cypher_to_graph(input_file):
         lines = fp.readlines()
         for line in lines:
             line = line.strip()
-            print(f"Parsing query '{line}'")
+
             if 'SET' in line:
-                args = re.match(re.compile(
-                    '^SET ([0-9a-zA-Z]+).([a-zA-Z]+) = \'?([0-9a-zA-Z\s\-_]+)\'?$'
-                ), line).groups()
-                if len(args) != 3:
+                match = re.match(re.compile(
+                    '^SET ([0-9a-zA-Z_]+).([a-zA-Z]+) = \'?([0-9a-zA-Z\s\-_]+)\'?$'
+                ), line)
+                if match is None or len(match.groups()) != 3:
                     print(f"Unable to parse cypher SET statement: {line}"
                           "The resulting table will not contain the effect of this statement, "
                           f"so you should probably add it by hand in the table")
                     continue
+                args = match.groups()
                 set_property(graph=graph, entity_name=args[0], prop=args[1], value=args[2])
 
             elif '[' in line and ']' in line:
-                args = re.match(re.compile(
+                match = re.match(re.compile(
                     '^MERGE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[([0-9a-zA-Z]+)?:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
-                ), line).groups()
-                if len(args) not in [5, 6]:
-                    print(f"Unable to parse cypher relationship MERGE statement: {line}\n"
-                          f"The resulting table will not contain the effect of this statement, "
-                          f"so you should probably add it by hand in the table")
-                    continue
+                ), line)
+                if match is None or len(match.groups()) not in [5, 6]:
+                    match = re.match(re.compile(
+                        '^CREATE \(([0-9a-zA-Z]+)\)([-<]{1,2})\[([0-9a-zA-Z_]+)?:([A-Z,_]+)\]([->]{1,2})\(([0-9a-zA-Z]+)\)$'
+                    ), line)
+                    if match is None or len(match.groups()) not in [5, 6]:
+                        print(f"Unable to parse cypher relationship creation statement: {line}\n"
+                              f"The resulting table will not contain the effect of this statement, "
+                              f"so you should probably add it by hand in the table")
+                        continue
+                args = match.groups()
                 if len(args) == 5:
                     add_edge(graph=graph, node1=args[0], node2=args[4], verb=args[2], direction=args[3])
                 else:
                     add_edge(graph=graph, node1=args[0], node2=args[5], verb=args[3], direction=args[4], verb_identifier=args[2])
 
             elif 'MERGE' in line:
-                args = re.match(re.compile(
+                match = re.match(re.compile(
                     '^MERGE \(([0-9a-zA-Z]+)((?::(?:[a-zA-Z]+)+)+)+(?: {((?:[a-zA-Z]+:(?: )?[0-9a-zA-Z]+(?:, )?)+)})?\)$'
-                ), line).groups()
-                if len(args) != 3:
+                ), line)
+                if match is None or len(match.groups()) != 3:
                     print(f"Unable to parse cypher node MERGE statement: {line}"
                           f"The resulting table will not contain the effect of this statement, "
                           f"so you should probably add it by hand in the table")
                     continue
+                args = match.groups()
                 merge_node(graph=graph, node_name=args[0], unparsed_labels=args[1], unparsed_properties=args[2])
 
             else:
